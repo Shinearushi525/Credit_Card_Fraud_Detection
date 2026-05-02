@@ -300,40 +300,6 @@ Daily Transactions     Estimated Daily Savings
 └── 📄 README.md                         # This file
 ```
 
----
-
-## 🚀 Quick Start
-
-### ▶️ Option 1 — Google Colab (Recommended)
-
-**Step 1** — Open [colab.research.google.com](https://colab.research.google.com) → New Notebook
-
-**Step 2** — Upload both files via the 📁 Files panel on the left:
-- `credit_card_fraud_detection.py`
-- `creditcard_sample.csv` *(or the full `creditcard.csv` from Kaggle)*
-
-**Step 3** — Paste and run in the first cell:
-
-```python
-exec(open('credit_card_fraud_detection.py').read())
-```
-
-> ⏱️ Runtime: ~3–5 min on sample · ~8–15 min on full dataset (free Colab CPU)
-
----
-
-## 🔮 Live Transaction Scorer
-
-Use the built-in scorer to assess **any transaction** in one call after training:
-
-```python
-result = score_transaction({
-    'V1': -2.31, 'V2': 1.95, 'V3': -3.72,
-    'V14': -6.23, 'V17': -4.10,          # anomalous PCA features
-    'Amount': 214.50,
-    'Time': 7200,                         # 2 AM
-})
-```
 
 **Sample Output:**
 
