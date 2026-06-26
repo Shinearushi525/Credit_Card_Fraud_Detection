@@ -358,13 +358,11 @@ Daily Transactions     Estimated Daily Savings
 
 *B.Tech Computer Science(AI and Data Science)*
 
-[![Email](https://img.shields.io/badge/Email-Arushigarg525@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:your@email.com)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Shinearushi525)
+## 🔗 Let's Connect
 
-</div>
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Arushi%20Garg-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/arushi-garg525/)
+[![GitHub](https://img.shields.io/badge/GitHub-Shinearushi525-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Shinearushi525)
+[![Email](https://img.shields.io/badge/Email-arushigarg525@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:Arushigarg525@gmail.com)
 
 ---
-
-<div align="center">
-
 </div>
