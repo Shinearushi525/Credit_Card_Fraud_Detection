@@ -18,7 +18,10 @@ schema/imbalance. Upload the real Kaggle dataset (mlg-ulb/creditcardfraud) in th
 sidebar for results that match the README's reported numbers.
 """
 
+import os
 import time
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -77,6 +80,54 @@ def load_sample_data(n_normal=9000, n_fraud=160, seed=42):
     df = pd.concat([make_rows(n_normal, False), make_rows(n_fraud, True)], ignore_index=True)
     df = df.sample(frac=1, random_state=seed).reset_index(drop=True)
     return df[V_COLS + ["Time", "Amount", "Class"]]
+
+
+DATA_DIR = Path("data")
+DATA_DIR.mkdir(exist_ok=True)
+LOCAL_CSV = DATA_DIR / "creditcard.csv"
+KAGGLE_DATASET = "mlg-ulb/creditcardfraud"
+
+
+def kaggle_credentials_present():
+    return bool(os.environ.get("KAGGLE_USERNAME")) and bool(os.environ.get("KAGGLE_KEY"))
+
+
+@st.cache_resource(show_spinner=False)
+def auto_download_kaggle_dataset():
+    """Download the real creditcard.csv from Kaggle using KAGGLE_USERNAME /
+    KAGGLE_KEY secrets. Cached to disk so it only downloads once per deployment.
+    Returns (success: bool, message: str)."""
+    if LOCAL_CSV.exists():
+        return True, f"Using cached dataset at {LOCAL_CSV}"
+
+    if not kaggle_credentials_present():
+        return False, (
+            "No Kaggle API credentials found. Add KAGGLE_USERNAME and KAGGLE_KEY "
+            "as Replit Secrets (get them from kaggle.com → Account → Create New API Token)."
+        )
+
+    try:
+        from kaggle.api.kaggle_api_extended import KaggleApi
+
+        api = KaggleApi()
+        api.authenticate()
+        api.dataset_download_files(KAGGLE_DATASET, path=str(DATA_DIR), unzip=True)
+
+        if not LOCAL_CSV.exists():
+            csvs = list(DATA_DIR.glob("*.csv"))
+            if csvs:
+                csvs[0].rename(LOCAL_CSV)
+
+        if not LOCAL_CSV.exists():
+            return False, "Download completed but creditcard.csv was not found in the archive."
+        return True, f"Downloaded real dataset from Kaggle ({KAGGLE_DATASET})."
+    except Exception as e:
+        return False, f"Kaggle download failed: {e}"
+
+
+@st.cache_data(show_spinner=False)
+def load_local_csv():
+    return pd.read_csv(LOCAL_CSV)
 
 
 @st.cache_data(show_spinner=False)
@@ -224,12 +275,41 @@ st.sidebar.caption("Rebuilt from Shinearushi525/Credit_Card_Fraud_Detection")
 
 data_source = st.sidebar.radio(
     "Dataset",
-    ["Synthetic demo data (instant)", "Upload creditcard.csv (Kaggle)"],
+    ["Auto-download real dataset (Kaggle)", "Upload creditcard.csv manually", "Synthetic demo data (instant)"],
     help="The real Kaggle dataset (284,807 rows) gives results matching the README. "
          "The demo dataset is synthetic and only for trying the app instantly.",
 )
 
-if data_source == "Upload creditcard.csv (Kaggle)":
+df, data_key = None, None
+
+if data_source == "Auto-download real dataset (Kaggle)":
+    if LOCAL_CSV.exists():
+        df = load_local_csv()
+        data_key = "kaggle-real"
+        st.sidebar.success(f"Real dataset cached — {len(df):,} rows")
+    elif kaggle_credentials_present():
+        with st.sidebar.status("Downloading real dataset from Kaggle...", expanded=False):
+            ok, msg = auto_download_kaggle_dataset()
+        if ok:
+            df = load_local_csv()
+            data_key = "kaggle-real"
+            st.sidebar.success(f"{msg} ({len(df):,} rows)")
+        else:
+            st.sidebar.error(msg)
+            df = load_sample_data()
+            data_key = "sample-default"
+    else:
+        st.sidebar.warning(
+            "No Kaggle credentials found. Add these as **Replit Secrets** (padlock icon "
+            "in the left sidebar) to enable auto-download:\n\n"
+            "- `KAGGLE_USERNAME`\n- `KAGGLE_KEY`\n\n"
+            "Get both from kaggle.com → your profile → **Settings** → **API** → "
+            "**Create New Token** (downloads a `kaggle.json` with both values)."
+        )
+        df = load_sample_data()
+        data_key = "sample-default"
+
+elif data_source == "Upload creditcard.csv manually":
     uploaded = st.sidebar.file_uploader("creditcard.csv", type=["csv"])
     if uploaded is not None:
         try:
@@ -248,6 +328,8 @@ else:
     df = load_sample_data()
     data_key = "sample-default"
 
+using_real_data = data_key == "kaggle-real" or (data_key or "").startswith("upload-")
+
 run_full_benchmark = st.sidebar.checkbox(
     "Run full 3-model benchmark (slower)", value=False,
     help="Off = XGBoost only (fast, used for scoring). On = also trains Logistic Regression and Random Forest for comparison.",
@@ -265,8 +347,17 @@ st.caption(
     "and business-impact analysis — Streamlit rebuild of the original notebook."
 )
 
-tab_overview, tab_train, tab_score, tab_impact = st.tabs(
-    ["📊 Overview", "🤖 Train & Benchmark", "🔍 Real-Time Scorer", "💰 Business Impact"]
+if using_real_data:
+    st.success(f"✅ Using the **real** Kaggle dataset — {len(df):,} transactions.", icon="✅")
+else:
+    st.warning(
+        "⚠️ Using **synthetic demo data**. Metrics, SHAP values, and € figures below are "
+        "illustrative only. Switch to the real dataset in the sidebar for meaningful results.",
+        icon="⚠️",
+    )
+
+tab_overview, tab_train, tab_score, tab_live, tab_impact = st.tabs(
+    ["📊 Overview", "🤖 Train & Benchmark", "🔍 Real-Time Scorer", "🔴 Live Monitor", "💰 Business Impact"]
 )
 
 # ----------------------------------------------------------------------------
@@ -466,6 +557,80 @@ with tab_score:
             ax.set_xlabel("SHAP value (→ pushes toward FRAUD, ← pushes toward NORMAL)")
             st.pyplot(fig)
             plt.close(fig)
+
+# ----------------------------------------------------------------------------
+# Tab: Live Monitor (simulated real-time stream)
+# ----------------------------------------------------------------------------
+with tab_live:
+    st.subheader("Live transaction monitor")
+    st.caption(
+        "Replays real held-out transactions one at a time, as if they were arriving live, "
+        "and scores each instantly — a stand-in for wiring the model into an actual "
+        "payment stream (which would need a live feed from a processor like Stripe/Plaid)."
+    )
+    if "pipeline" not in st.session_state:
+        st.warning("Train the model first in the **Train & Benchmark** tab.")
+    else:
+        pipeline = st.session_state["pipeline"]
+        stream_pool = pipeline["df_test_raw"].sample(frac=1, random_state=int(time.time()) % 1000)
+
+        c1, c2, c3 = st.columns(3)
+        n_txns = c1.slider("Transactions to stream", 10, 200, 40, step=10)
+        speed = c2.slider("Delay per transaction (sec)", 0.0, 1.0, 0.15, step=0.05)
+        fraud_boost = c3.checkbox("Bias sample toward more fraud (for demo)", value=True)
+
+        if fraud_boost:
+            fraud_rows = stream_pool[stream_pool["Class"] == 1]
+            normal_rows = stream_pool[stream_pool["Class"] == 0]
+            n_fraud_take = min(len(fraud_rows), max(3, n_txns // 6))
+            stream_rows = pd.concat([
+                fraud_rows.sample(n_fraud_take, random_state=1),
+                normal_rows.sample(n_txns - n_fraud_take, random_state=1),
+            ]).sample(frac=1, random_state=2).reset_index(drop=True)
+        else:
+            stream_rows = stream_pool.sample(n_txns, random_state=3).reset_index(drop=True)
+
+        start = st.button("▶️ Start live stream", type="primary")
+
+        metric_row = st.empty()
+        alert_box = st.container()
+        progress = st.progress(0.0)
+
+        if start:
+            scanned, caught, blocked_value = 0, 0, 0.0
+            alerts = []
+
+            for i, row in stream_rows.iterrows():
+                tx = row[V_COLS + ["Amount", "Time"]].to_dict()
+                prob, pred, risk, color, pairs = score_transaction(pipeline, tx)
+                scanned += 1
+                if pred == 1:
+                    caught += 1
+                    blocked_value += float(row["Amount"])
+                    alerts.insert(0, {
+                        "Amount": f"€{row['Amount']:.2f}",
+                        "Fraud prob": f"{prob*100:.1f}%",
+                        "Risk": risk,
+                        "Actual": "FRAUD" if row["Class"] == 1 else "false alarm",
+                    })
+
+                with metric_row.container():
+                    m1, m2, m3 = st.columns(3)
+                    m1.metric("Transactions scanned", scanned)
+                    m2.metric("Flagged as fraud", caught)
+                    m3.metric("€ value blocked", f"€{blocked_value:,.2f}")
+
+                with alert_box:
+                    if alerts:
+                        st.write("**🚨 Recent alerts**")
+                        st.dataframe(pd.DataFrame(alerts[:10]), use_container_width=True, hide_index=True)
+
+                progress.progress(scanned / len(stream_rows))
+                time.sleep(speed)
+
+            st.success(f"Stream finished — {caught} of {scanned} transactions flagged as fraud.")
+        else:
+            st.info("Click **Start live stream** to begin.")
 
 # ----------------------------------------------------------------------------
 # Tab: Business Impact
