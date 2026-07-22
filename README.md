@@ -30,13 +30,15 @@
 
 <div align="center">
 
-**Real-time transaction scorer** — score any transaction instantly and see the model's reasoning:
+### **Real-time transaction scorer** — score any transaction instantly and see the model's reasoning:
 
-![Real-time scorer](screenshots/realtime_scorer_demo.png)
+<img width="683" height="335" alt="realtime_scorer_demo" src="https://github.com/user-attachments/assets/b400c9e5-88e7-4416-999b-50837bc28d96" />
 
-**Live transaction monitor** — streams real held-out transactions one at a time and flags fraud as it happens:
 
-![Live monitor](screenshots/live_monitor_demo.png)
+### **Live transaction monitor** — streams real transactions one at a time and flags fraud as it happens:
+
+<img width="706" height="415" alt="live_monitor_demo" src="https://github.com/user-attachments/assets/b70e8ba2-056a-4cab-b24a-62b863e60b0e" />
+
 
 </div>
 
