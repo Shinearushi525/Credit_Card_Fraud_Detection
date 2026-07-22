@@ -7,38 +7,40 @@
 <br/>
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Live%20App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://credit-card-fraud-detection-analysis.streamlit.app/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-Best%20Model-FF6600?style=for-the-badge&logo=xgboost&logoColor=white)](#)
 [![SHAP](https://img.shields.io/badge/SHAP-Explainable%20AI-8E44AD?style=for-the-badge&logo=buffer&logoColor=white)](#)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML%20Pipeline-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
 [![Dataset](https://img.shields.io/badge/Dataset-284%2C807%20Transactions-2ECC71?style=for-the-badge&logo=kaggle&logoColor=white)](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
-[![Colab](https://img.shields.io/badge/Google%20Colab-Ready-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](#)
-[![Status](https://img.shields.io/badge/Status-✅%20Complete-2ECC71?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-✅%20Live-2ECC71?style=for-the-badge)](https://credit-card-fraud-detection-analysis.streamlit.app/)
 
 <br/>
 
-> **284,807 real transactions** · **492 fraud cases (0.17%)** · **4 ML models benchmarked** · **SHAP explainability** · **real-time transaction scorer** · **business impact analysis**
+> **284,807 real transactions** · **492 fraud cases (0.17%)** · **SMOTE + XGBoost pipeline** · **SHAP explainability** · **real-time transaction scorer** · **live streaming monitor** · **business impact analysis**
 
 <br/>
 
-<div align="center">
-
-### 🔬 See It In Action
-
-| | |
-|---|---|
-| 💳 **Transaction** | Amount: €214.50 · Hour: 2 AM · V14: −6.23 · V12: −5.81 |
-| 🚨 **Prediction** | `FRAUD` — confidence 94.7% |
-| 📊 **Risk Level** | `CRITICAL` 🚨 — Block immediately |
-| 🔍 **Top Signal** | V14 ↓ extreme low · V12 ↓ anomalous · High-hour flag |
-| 💡 **SHAP Reason** | V14 pushes +0.62 toward fraud · V12 pushes +0.48 |
-| 💰 **Action** | Transaction blocked · €214.50 saved |
-
-</div>
+### 🚀 [**Try the live app →**](https://credit-card-fraud-detection-analysis.streamlit.app/)
 
 </div>
 
 ---
 
+## 🔬 See It In Action
+
+<div align="center">
+
+**Real-time transaction scorer** — score any transaction instantly and see the model's reasoning:
+
+![Real-time scorer](screenshots/realtime_scorer_demo.png)
+
+**Live transaction monitor** — streams real held-out transactions one at a time and flags fraud as it happens:
+
+![Live monitor](screenshots/live_monitor_demo.png)
+
+</div>
+
+---
 
 ## 🎯 The Problem
 
@@ -66,33 +68,36 @@ Standard classifiers trained on imbalanced data simply learn to predict "Normal"
 
 ## ✨ What Makes This Unique
 
-Most fraud detection projects stop at "train a classifier and show accuracy." This system goes **6 layers deeper:**
+Most fraud detection projects stop at "train a classifier and show accuracy." This system goes several layers deeper — and ships as a live, interactive app instead of a static notebook:
 
 ```
 TYPICAL PROJECT              THIS PROJECT
 ───────────────              ────────────────────────────────────────────
-Train model          →       ✅ 4 ML models benchmarked (LR, RF, XGB, LGBM)
-Show accuracy        →       ✅ Correct metrics: ROC-AUC + Precision-Recall
-                     →       ✅ SMOTE oversampling — handles 577:1 imbalance
+Train model          →       ✅ SMOTE-balanced XGBoost, benchmarked vs LR/RF
+Show accuracy         →       ✅ Correct metrics: ROC-AUC + Precision-Recall
                      →       ✅ Threshold tuning — maximise F1 not accuracy
                      →       ✅ SHAP explainability — WHY was this fraud?
                      →       ✅ Business impact — exact € saved by the model
                      →       ✅ Real-time scorer with 5 risk tiers
+                     →       ✅ Live streaming monitor for continuous scoring
+                     →       ✅ Deployed as a working app, not just a notebook
 ```
 
 <br/>
 
-### 🏗️ The 7 Core Components
+### 🏗️ The Core Components
 
 | # | Component | Description | Tech Used |
 |---|-----------|-------------|-----------|
-| 1 | 📊 **Deep EDA** | Class imbalance, amount distribution, hourly fraud patterns | Matplotlib, Seaborn |
-| 2 | ⚙️ **Feature Engineering** | Log_Amount, Hour, High_Amount extracted from raw data | Pandas, NumPy |
+| 1 | 📊 **Deep EDA** | Class imbalance, amount distribution, hourly fraud patterns | Matplotlib |
+| 2 | ⚙️ **Feature Engineering** | Log_Amount, Hour, High_Amount, Zero_Amount, V1×V2 and V14×V17 interactions | Pandas, NumPy |
 | 3 | ⚖️ **SMOTE Balancing** | Oversamples minority class on training data only | imbalanced-learn |
-| 4 | 🤖 **4-Model Benchmark** | LR, Random Forest, XGBoost, LightGBM compared | Scikit-learn, XGBoost, LightGBM |
-| 5 | 🧠 **SHAP XAI** | Global importance + per-transaction waterfall explanation | SHAP TreeExplainer |
+| 4 | 🤖 **Model Benchmark** | XGBoost (primary) vs Logistic Regression & Random Forest | Scikit-learn, XGBoost |
+| 5 | 🧠 **SHAP XAI** | Global importance + per-transaction explanation | SHAP TreeExplainer |
 | 6 | 💰 **Business Impact** | € caught, € missed, false alarm cost, net savings at scale | Custom analysis |
 | 7 | 🔮 **Real-Time Scorer** | Score any transaction instantly with risk tier + SHAP reason | Full inference pipeline |
+| 8 | 🔴 **Live Monitor** | Streams real held-out transactions and flags fraud as it arrives | Streamlit session state |
+| 9 | 🌐 **Deployed App** | Interactive Streamlit app, live on the web | Streamlit Cloud / Replit |
 
 ---
 
@@ -111,7 +116,7 @@ Show accuracy        →       ✅ Correct metrics: ROC-AUC + Precision-Recall
 | **Features** | 30 (V1–V28 via PCA + Time + Amount) |
 | **Labels** | `Class` — 0 = Normal, 1 = Fraud |
 | **Missing Values** | None |
-| **File Size** | ~150 MB (full) · ~2.7 MB (sample) |
+| **File Size** | ~150 MB (full) |
 | **Kaggle Link** | [mlg-ulb/creditcardfraud](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) |
 
 </div>
@@ -140,37 +145,40 @@ Imbalance Ratio: 577 normal transactions for every 1 fraud
 | `Log_Amount` *(engineered)* | `float` | `log1p(Amount)` — normalises right-skewed distribution |
 | `Hour` *(engineered)* | `int` | Hour of day (0–23) derived from `Time` |
 | `High_Amount` *(engineered)* | `int` | `1` if Amount > 95th percentile, else `0` |
+| `Zero_Amount` *(engineered)* | `int` | `1` if Amount == 0, else `0` |
+| `V1_V2_interact` *(engineered)* | `float` | `V1 × V2` interaction term |
+| `V14_V17_interact` *(engineered)* | `float` | `V14 × V17` interaction term |
 
-> ⚠️ **GitHub Dataset Note:** The full `creditcard.csv` (~150 MB) exceeds GitHub's file size limit. This repo includes `creditcard_sample.csv` (10,000 rows, same schema) for testing. Download the full dataset from Kaggle for production training.
+> ⚠️ **Dataset note:** The full `creditcard.csv` (~150 MB) exceeds GitHub's file size limit and isn't bundled in this repo. The live app ships with a small synthetic demo dataset (same schema) so it runs instantly with zero setup — upload the real Kaggle CSV in the app's sidebar for results that match the numbers below.
 
 ---
 
 ## ⚙️ Feature Engineering
 
-Three features were engineered from the raw dataset columns. Each was chosen for a specific analytical reason:
+Six features were engineered from the raw dataset columns:
 
 | Feature | Formula | Why It Helps |
 |---------|---------|-------------|
-| `Log_Amount` | `log1p(Amount)` | Transaction amounts are heavily right-skewed (most are small, a few are huge). Log-transform normalises this so models don't overweight large amounts. |
-| `Hour` | `(Time // 3600) % 24` | Fraud peaks sharply between 0–4 AM when monitoring is minimal. Hour captures this temporal signal directly. |
-| `High_Amount` | `Amount > 95th percentile` | Flags unusually large transactions as a binary risk signal — distinct from the continuous amount value. |
-
-> V-feature interaction terms (`V1*V2` etc.) were tested but removed — tree-based models already capture interactions internally, so these added training time without measurable gain.
+| `Log_Amount` | `log1p(Amount)` | Transaction amounts are heavily right-skewed. Log-transform normalises this so models don't overweight large amounts. |
+| `Hour` | `(Time // 3600) % 24` | Fraud peaks sharply overnight when monitoring is minimal. Hour captures this temporal signal directly. |
+| `High_Amount` | `Amount > 95th percentile` | Flags unusually large transactions as a binary risk signal. |
+| `Zero_Amount` | `Amount == 0` | Zero-value transactions are a known fraud-testing pattern (card validation probes). |
+| `V1_V2_interact` | `V1 × V2` | Captures a non-linear interaction between two of the strongest PCA components. |
+| `V14_V17_interact` | `V14 × V17` | `V14` and `V17` are consistently the top two SHAP features; their product sharpens the signal further. |
 
 ---
 
 ## 🤖 ML Models Compared
 
-Four models were trained on SMOTE-balanced data and evaluated on the **original imbalanced test set** (the real-world distribution):
+Models are trained on SMOTE-balanced data and evaluated on the **original imbalanced test split** (the real-world distribution):
 
 | Model | Why Included |
 |-------|-------------|
 | **Logistic Regression** | Interpretable baseline; shows if the problem is linearly separable |
 | **Random Forest** | Strong ensemble, handles non-linearity, robust to outliers |
-| **XGBoost** | Best-in-class for tabular fraud data; native `scale_pos_weight` for imbalance |
-| **LightGBM** | Faster than XGBoost on large datasets; comparable accuracy |
+| **XGBoost** | Primary model — best-in-class for tabular fraud data; native `scale_pos_weight` for imbalance |
 
-> Gradient Boosting (sklearn), SVM, and Isolation Forest were evaluated and removed — redundant with XGBoost/LightGBM, prohibitively slow on 280K rows, and/or producing poor results.
+> XGBoost is used for the live scorer and SHAP explanations. Logistic Regression and Random Forest are available as an optional benchmark comparison inside the app.
 
 ### ⚖️ Why NOT Accuracy?
 
@@ -185,17 +193,16 @@ On a 577:1 imbalanced dataset, a model that predicts "Normal" for every transact
 
 ## 📈 Results & Performance
 
-> Results shown are on the held-out test set (20% of data, never seen during training).
+> Computed live inside the app after training — exact numbers depend on whether you're using the bundled synthetic demo data or the real Kaggle dataset.
 
 ```
 Model                  ROC-AUC    Avg Precision    F1       Recall    Precision
 ────────────────────────────────────────────────────────────────────────────────
 🏆 XGBoost             ~98–99%       ~85–90%      ~85%      ~88%        ~82%
-   LightGBM            ~97–98%       ~83–88%      ~83%      ~86%        ~80%
    Random Forest       ~96–98%       ~80–86%      ~80%      ~82%        ~78%
    Logistic Regression ~95–97%       ~72–78%      ~73%      ~76%        ~70%
 ────────────────────────────────────────────────────────────────────────────────
-* Exact values vary with dataset version (sample vs full) and random seed
+* Real Kaggle dataset. Numbers on the synthetic demo data are illustrative only.
 ```
 
 ### 🎯 Threshold Tuning
@@ -210,8 +217,6 @@ SHAP (SHapley Additive exPlanations) answers the critical compliance question: *
 
 ### Global Feature Importance
 
-Shows which features drive the model's decisions across all transactions:
-
 ```
 Most Important Fraud Features (SHAP):
 ──────────────────────────────────────
@@ -220,62 +225,44 @@ V12   ████████████████
 V10   ██████████████
 V17   █████████████
 V4    ████████
-V11   ███████
 Amount ██████
-V3    █████
 Hour   ████
-V7    ███
 ```
 
-### Per-Transaction Waterfall
+### Per-Transaction Explanation
 
-For every flagged transaction, SHAP generates a waterfall chart showing exactly which feature values pushed the prediction toward fraud and by how much — essential for audit trails and compliance reports.
-
-```
-Example: Why was Transaction #4521 flagged?
-
-Base rate                      →  0.17% (dataset fraud rate)
-+ V14 = −6.23 (extreme low)   →  +0.62 push toward FRAUD
-+ V12 = −5.81 (anomalous)     →  +0.48 push toward FRAUD
-+ Hour = 2 (night)            →  +0.11 push toward FRAUD
-+ Amount = €214 (moderate)    →  +0.03 push toward FRAUD
-─────────────────────────────────────────────────────────
-Final prediction               →  94.7% FRAUD probability
-```
+For every scored transaction, the app shows a SHAP bar chart of the top 6 features that pushed the prediction toward — or away from — fraud, as seen in the screenshot above.
 
 ---
 
 ## 💰 Business Impact Analysis
 
-The model's value is measured in euros, not just percentages.
+The model's value is measured in euros, not just percentages. The **Business Impact** tab computes, live, on your test set:
 
 <div align="center">
 
-### 💵 Financial Impact (Test Set Sample)
-
 | Metric | Value |
 |--------|-------|
-| Average fraud transaction | ~€122 |
+| Average fraud transaction | configurable (default ~€122) |
 | Frauds correctly caught | TP transactions |
-| Fraud value recovered | TP × €122 |
+| Fraud value recovered | TP × avg fraud value |
 | Frauds missed | FN transactions |
-| False alarm investigation cost | FP × €2.50 |
+| False alarm investigation cost | FP × cost per alarm |
 | **Net savings vs no model** | **Caught value − False alarm cost** |
 
 </div>
 
 ### 📈 Scaling Impact
 
-```
-Daily Transactions     Estimated Daily Savings
-───────────────────────────────────────────────
-10,000                 ~€X,XXX
-100,000                ~€XX,XXX
-1,000,000              ~€XXX,XXX
-10,000,000             ~€X,XXX,XXX
-```
+The app also projects savings at scale (10K / 100K / 1M / 10M transactions per day) based on your test-set performance.
 
-> *Exact values depend on your dataset version. The pipeline prints precise figures after training.*
+---
+
+## 🔴 Live Monitor
+
+Beyond one-off scoring, the app includes a **live streaming monitor** that replays real held-out transactions one at a time — like a live transaction feed — scoring each instantly and surfacing fraud alerts as they happen, with running totals for transactions scanned, frauds flagged, and € value blocked. See the screenshot above.
+
+> This simulates what a production integration into a live payment stream (e.g. via Stripe/Plaid) would look like at the model-inference layer.
 
 ---
 
@@ -284,43 +271,34 @@ Daily Transactions     Estimated Daily Savings
 ```
 📦 credit-card-fraud-detection/
 │
-├── 📓 credit_card_fraud_detection.py    # Main project — all 15 cells
-├── 🛠️  generate_sample_dataset.py        # Generates creditcard_sample.csv
-│
-├── 📊 data/
-│   ├── creditcard_sample.csv            # 10,000-row GitHub-safe sample
-│   └── creditcard.csv                   # Full dataset (download from Kaggle)
-│
-├── 🧠 models/
-│   ├── fraud_best_model.pkl             # Best trained classifier
-│   ├── fraud_xgb_model.pkl             # XGBoost model (used for SHAP)
-│   ├── fraud_scaler.pkl                # Fitted RobustScaler
-│   └── fraud_shap_explainer.pkl        # SHAP TreeExplainer object
-│
-└── 📄 README.md                         # This file
+├── 🖥️  app.py                     # Streamlit app — all 5 tabs, training pipeline, scorer
+├── 🛠️  generate_sample_dataset.py  # Generates the synthetic demo dataset
+├── 📄 requirements.txt             # Python dependencies
+├── ⚙️  run.sh                      # Install + launch script (used by Replit)
+├── ⚙️  .replit                     # Replit run/deploy configuration
+├── ⚙️  .streamlit/config.toml      # Streamlit server settings (port, theme, upload size)
+├── 🖼️  screenshots/                # App screenshots used in this README
+└── 📄 README.md                   # This file
 ```
 
+**Note:** the original notebook-based pipeline (`.ipynb`) that this app was built from is kept for reference but is not required to run the app — `app.py` reproduces the full pipeline (feature engineering → RobustScaler → SMOTE → XGBoost → SHAP) natively in Python.
 
-**Sample Output:**
+---
 
+## 🚀 Run It
+
+### Locally
+```bash
+pip install -r requirements.txt
+streamlit run app.py
 ```
-════════════════════════════════════════════════════════════
-  💳  REAL-TIME FRAUD SCORER
-════════════════════════════════════════════════════════════
 
-  Fraud Probability  : 94.71%
-  Decision           : 🚫 FRAUD
-  Risk Level         : 🚨 CRITICAL — Block immediately
+### Live app
+👉 **[credit-card-fraud-detection-analysis.streamlit.app](https://credit-card-fraud-detection-analysis.streamlit.app/)**
 
-  Top Fraud Signals:
-    • V14              SHAP = +0.6231  ↑ pushes to FRAUD
-    • V12              SHAP = +0.4819  ↑ pushes to FRAUD
-    • V17              SHAP = +0.3105  ↑ pushes to FRAUD
-    • Hour             SHAP = +0.1142  ↑ pushes to FRAUD
-    • Amount           SHAP = +0.0318  ↑ pushes to FRAUD
+Works instantly with the bundled synthetic demo dataset. Upload the real `creditcard.csv` from [Kaggle](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) in the sidebar for results matching the numbers in this README.
 
-════════════════════════════════════════════════════════════
-```
+---
 
 ### 🎚️ Risk Tier Reference
 
@@ -339,13 +317,14 @@ Daily Transactions     Estimated Daily Savings
 | Category | Tools |
 |----------|-------|
 | **Language** | Python 3.10+ |
+| **App / UI** | Streamlit |
 | **Data** | Pandas, NumPy |
-| **ML Models** | Scikit-learn, XGBoost, LightGBM |
+| **ML Models** | Scikit-learn, XGBoost |
 | **Imbalance Handling** | imbalanced-learn (SMOTE) |
 | **Explainability** | SHAP (TreeExplainer) |
 | **Preprocessing** | RobustScaler, Stratified Split |
-| **Visualization** | Matplotlib, Seaborn |
-| **Environment** | Google Colab / Local Python |
+| **Visualization** | Matplotlib |
+| **Deployment** | Streamlit Community Cloud / Replit |
 | **Version Control** | Git + GitHub |
 
 ---
@@ -356,7 +335,7 @@ Daily Transactions     Estimated Daily Savings
 
 **Arushi Garg**
 
-*B.Tech Computer Science(AI and Data Science)*
+*B.Tech Computer Science (AI and Data Science)*
 
 ## 🔗 Let's Connect
 
