@@ -74,7 +74,7 @@ Most fraud detection projects stop at "train a classifier and show accuracy." Th
 TYPICAL PROJECT              THIS PROJECT
 ───────────────              ────────────────────────────────────────────
 Train model          →       ✅ SMOTE-balanced XGBoost, benchmarked vs LR/RF
-Show accuracy         →       ✅ Correct metrics: ROC-AUC + Precision-Recall
+Show accuracy        →       ✅ Correct metrics: ROC-AUC + Precision-Recall
                      →       ✅ Threshold tuning — maximise F1 not accuracy
                      →       ✅ SHAP explainability — WHY was this fraud?
                      →       ✅ Business impact — exact € saved by the model
@@ -193,21 +193,21 @@ On a 577:1 imbalanced dataset, a model that predicts "Normal" for every transact
 
 ## 📈 Results & Performance
 
-> Computed live inside the app after training — exact numbers depend on whether you're using the bundled synthetic demo data or the real Kaggle dataset.
+> These are the actual results from running the pipeline on the **real, full 284,807-row Kaggle dataset** (20% held-out test split — 56,962 transactions, 98 of them fraud). Your own numbers when you run the app will vary slightly by random seed and by which dataset (real vs. the bundled synthetic demo) you use — this is a single reference run, not a guarantee.
 
-```
-Model                  ROC-AUC    Avg Precision    F1       Recall    Precision
-────────────────────────────────────────────────────────────────────────────────
-🏆 XGBoost             ~98–99%       ~85–90%      ~85%      ~88%        ~82%
-   Random Forest       ~96–98%       ~80–86%      ~80%      ~82%        ~78%
-   Logistic Regression ~95–97%       ~72–78%      ~73%      ~76%        ~70%
-────────────────────────────────────────────────────────────────────────────────
-* Real Kaggle dataset. Numbers on the synthetic demo data are illustrative only.
-```
+| Model | ROC-AUC | Avg Precision | F1 | Recall | Precision |
+|---|---|---|---|---|---|
+| 🏆 **XGBoost** | **98.41%** | **86.05%** | **77.63%** | 86.73% | 70.25% |
+| Random Forest | 98.39% | 81.95% | 68.88% | 84.69% | 58.04% |
+| Logistic Regression | 97.31% | 72.82% | 10.04% | 91.84% | 5.31% |
+
+**Note on Logistic Regression:** its F1/Precision look extreme (10%/5%) because at the default decision threshold it flags a huge number of normal transactions as fraud to keep recall high — a real illustration of why threshold tuning and F1 (not accuracy) matter for this problem, not a bug.
+
+> The original notebook also benchmarks **LightGBM** (98.39% ROC-AUC, 82.13% F1) — the Streamlit app doesn't implement LightGBM, so it isn't in the table above.
 
 ### 🎯 Threshold Tuning
 
-The default 0.5 classification threshold is not optimal for fraud. The pipeline sweeps thresholds from 0.1 → 0.9 and selects the value that **maximises F1** — typically landing between 0.35–0.45, boosting recall without sacrificing too much precision.
+The default 0.5 classification threshold is not optimal for fraud. The app sweeps thresholds from 0.1 → 0.9 and selects the value that **maximises F1**. On the real dataset, that landed at **0.89** in the reference run — much higher than a typical classifier default, reflecting how skewed the confidence distribution is on this data. The exact value the app lands on for you depends on the data and random seed used.
 
 ---
 
@@ -237,24 +237,35 @@ For every scored transaction, the app shows a SHAP bar chart of the top 6 featur
 
 ## 💰 Business Impact Analysis
 
-The model's value is measured in euros, not just percentages. The **Business Impact** tab computes, live, on your test set:
+The model's value is measured in euros, not just percentages. The **Business Impact** tab computes this live for whatever dataset you train on. Here's a real reference run on the full Kaggle test split (56,962 transactions, 98 fraud, at the tuned XGBoost threshold):
 
 <div align="center">
 
 | Metric | Value |
 |--------|-------|
-| Average fraud transaction | configurable (default ~€122) |
-| Frauds correctly caught | TP transactions |
-| Fraud value recovered | TP × avg fraud value |
-| Frauds missed | FN transactions |
-| False alarm investigation cost | FP × cost per alarm |
-| **Net savings vs no model** | **Caught value − False alarm cost** |
+| Average fraud transaction | €122.21 |
+| Frauds correctly caught | 85 |
+| Frauds missed | 13 |
+| False alarms (normal flagged as fraud) | 36 |
+| Fraud value recovered | €10,387.96 |
+| Fraud value missed | €1,588.75 |
+| False alarm investigation cost | €90.00 |
+| **Net savings vs. no model** | **€10,297.96** per 56,962 transactions |
 
 </div>
 
 ### 📈 Scaling Impact
 
-The app also projects savings at scale (10K / 100K / 1M / 10M transactions per day) based on your test-set performance.
+Extrapolating that same test-set savings rate:
+
+| Daily Transactions | Estimated Daily Savings |
+|---|---|
+| 10,000 | ~€1,808 |
+| 100,000 | ~€18,079 |
+| 1,000,000 | ~€180,787 |
+| 10,000,000 | ~€1,807,870 |
+
+> These figures come from one reference run on the real dataset. Your own numbers will differ based on the data, random seed, and threshold the app lands on.
 
 ---
 
@@ -281,7 +292,7 @@ Beyond one-off scoring, the app includes a **live streaming monitor** that repla
 └── 📄 README.md                   # This file
 ```
 
-**Note:** the original notebook-based pipeline (`.ipynb`) that this app was built from is kept for reference but is not required to run the app — `app.py` reproduces the full pipeline (feature engineering → RobustScaler → SMOTE → XGBoost → SHAP) natively in Python.
+**Note:** the original notebook-based pipeline (`.ipynb`) that this app was built from is kept for reference but is not required to run the app — `app.py` reproduces the supervised part of the pipeline (feature engineering → RobustScaler → SMOTE → XGBoost → SHAP) natively in Python. The notebook additionally runs **Isolation Forest / Local Outlier Factor** (unsupervised anomaly detection) and **LIME** explanations — these are not implemented in the Streamlit app, which focuses on the SMOTE + XGBoost + SHAP path plus the real-time scorer, live monitor, and business-impact tools.
 
 ---
 
